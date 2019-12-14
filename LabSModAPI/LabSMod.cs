@@ -9,6 +9,7 @@ using LabSModAPI.API;
 using Smod2;
 using System.IO;
 using LabSModAPI.Logging;
+using MonoMod.RuntimeDetour;
 
 namespace LabSModAPI
 {
@@ -22,6 +23,15 @@ namespace LabSModAPI
 			On.Searching.CallCmdPickupItem += Searching_CallCmdPickupItem;
 			On.Inventory.CallCmdDropItem += Inventory_CallCmdDropItem;
 			On.NicknameSync.UpdateNickname += NicknameSync_UpdateNickname;
+			On.AlphaWarheadController.Detonate += AlphaWarheadController_Detonate;
+			//Detour d = new Detour(typeof(CharacterClassManager).GetMethod(""), );
+		}
+
+		private static void AlphaWarheadController_Detonate(On.AlphaWarheadController.orig_Detonate orig, AlphaWarheadController self)
+		{
+			var evnt = new WarheadDetonateEvent();
+			EventManager.Manager.HandleEvent<IEventHandlerWarheadDetonate>(evnt);
+			orig(self);
 		}
 
 		private static void Inventory_CallCmdDropItem(On.Inventory.orig_CallCmdDropItem orig, Inventory self, int itemInventoryIndex)
